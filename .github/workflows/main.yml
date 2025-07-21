@@ -1,0 +1,6 @@
+frequencies = np.linspace(7.0, 8.6, 50)  # Schumann range
+quantum_yield = []
+for freq in frequencies:
+    play_audio(freq)
+    quantum_yield.append(measure_plasma_coherence())
+# Find quantum resonance peak
