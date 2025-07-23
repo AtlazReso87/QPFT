@@ -1,0 +1,170 @@
+import numpy as np
+import math
+
+class QuantumPlasmoidAnalyzer:
+    def __init__(self):
+        # Core parameters with default ranges
+        self.params = {
+            'λ_vis': 850e-9,    # Visibility wavelength (m)
+            'λ_invis': 940e-9,  # Invisibility wavelength (m)
+            'RF_env': [2.4, 5.0],  # Ambient RF frequencies (GHz)
+            'm': 1e-18,         # Plasmoid mass (kg) [Range: 1e-20 - 1e-16]
+            'V₀': 0.15,         # Energy barrier (eV) [Range: 0.01-1.0]
+            'L_coherence': 0.15, # Quantum coherence length (m) [Range: 0.01-0.5]
+            'confidence_weights': [0.9, 0.7, 0.8]  # [Vis, Move, Quant]
+        }
+        self.evolution_log = [
+            ("1.0", "Baseline", "Initial framework")
+        ]
+    
+    def update_param(self, param, value):
+        """Update analysis parameters with validation"""
+        valid_ranges = {
+            'm': (1e-20, 1e-16),
+            'V₀': (0.01, 1.0),
+            'L_coherence': (0.01, 0.5)
+        }
+        
+        if param in valid_ranges:
+            min_val, max_val = valid_ranges[param]
+            if min_val <= value <= max_val:
+                self.params[param] = value
+                return f"Updated {param} to {value}"
+            else:
+                raise ValueError(f"{param} must be between {min_val} and {max_val}")
+        else:
+            self.params[param] = value
+            return f"Updated {param} to {value}"
+
+    def log_evolution(self, version, changes, trigger):
+        """Document framework evolution"""
+        self.evolution_log.append((version, changes, trigger))
+        return f"v{version} logged: {changes} ({trigger})"
+
+    def analyze_visibility(self, evidence_quality, pulsation_rf_correlation):
+        """Visibility confidence analysis"""
+        # Fundamental constants
+        h = 4.135667662e-15  # eV·s (Planck's constant)
+        c = 3e8              # m/s (speed of light)
+        
+        # Calculate energy gap
+        ΔE = (h * c) / self.params['λ_vis'] * 1e9  # eV
+        
+        # Confidence calculation
+        base_confidence = 0.9 * evidence_quality
+        rf_modulation_boost = 0.15 * pulsation_rf_correlation
+        return min(1.0, base_confidence + rf_modulation_boost), ΔE
+
+    def analyze_locomotion(self, displacement, delta_t, deviation_angle):
+        """Quantum-jump locomotion analysis"""
+        # Fundamental constants
+        ħ = 6.582119569e-16  # eV·s (reduced Planck)
+        m_kg = self.params['m']
+        V0 = self.params['V₀']
+        
+        # Convert mass to eV/c² (E = mc²)
+        c2 = (3e8)**2  # m²/s²
+        J_to_eV = 6.242e18
+        m_eV = m_kg * c2 * J_to_eV
+        
+        # Calculate tunneling probability
+        exponent = -2 * displacement * math.sqrt(2 * m_eV * V0) / ħ
+        P_tunnel = math.exp(exponent)
+        
+        # Confidence calculation
+        angle_penalty = max(0, 1 - (deviation_angle / 15))
+        time_consistency = 0.8 if delta_t < 0.5 else 0.5
+        return P_tunnel, time_consistency * angle_penalty
+
+    def analyze_quantum_interaction(self, correlation, distance):
+        """Quantum entanglement analysis"""
+        # Calculate distance penalty
+        distance_ratio = min(1.0, distance / self.params['L_coherence'])
+        coherence_penalty = 1 - distance_ratio
+        
+        # Correlation strength factor
+        correlation_strength = min(1.0, abs(correlation))
+        
+        # Confidence calculation
+        return correlation_strength * coherence_penalty
+
+    def check_anomalies(self, delta_temp, trajectory_shift, delta_pulsation):
+        """Anomaly detection matrix"""
+        anomalies = []
+        if delta_temp < 0.5:
+            anomalies.append("Thermal paradox confirmed")
+        else:
+            anomalies.append("Thermal paradox VIOLATION")
+            
+        if trajectory_shift < 5:
+            anomalies.append("EM deflection within expected range")
+        else:
+            anomalies.append("Excessive EM deflection - model adjustment needed")
+            
+        if delta_pulsation > 0.2:
+            anomalies.append("Adaptive resonance detected - activate SPP model")
+        return anomalies
+
+    def suggest_validation(self, confidence_scores):
+        """Recommend validation steps based on confidence"""
+        protocols = []
+        if confidence_scores[0] < 0.85:
+            protocols.append(f"Spectral test: Scan λ = {self.params['λ_vis']*1e9:.0f}±50nm")
+        if confidence_scores[1] < 0.75:
+            protocols.append("RF phase test: Apply phase-controlled 2.4/5GHz signals")
+        if confidence_scores[2] < 0.8:
+            protocols.append(f"Decoherence test: Vary distances up to {self.params['L_coherence']*100:.0f}cm")
+        return protocols
+
+# ============= EXAMPLE USAGE =============
+if __name__ == "__main__":
+    print("=== QUANTUM PLASMOID ANALYSIS FRAMEWORK v1.0 ===")
+    analyzer = QuantumPlasmoidAnalyzer()
+    
+    # Update parameters for new observation
+    print(analyzer.update_param('λ_vis', 830e-9))
+    print(analyzer.update_param('m', 2.5e-18))
+    
+    # Analyze observations from new footage
+    vis_confidence, ΔE = analyzer.analyze_visibility(
+        evidence_quality=0.95, 
+        pulsation_rf_correlation=0.92
+    )
+    print(f"\nVisibility Analysis: Confidence = {vis_confidence:.1%}, ΔE = {ΔE:.3f}eV")
+    
+    tunnel_prob, move_confidence = analyzer.analyze_locomotion(
+        displacement=2.2, 
+        delta_t=0.4, 
+        deviation_angle=8
+    )
+    print(f"Locomotion Analysis: P_tunnel = {tunnel_prob:.1e}, Confidence = {move_confidence:.1%}")
+    
+    quant_confidence = analyzer.analyze_quantum_interaction(
+        correlation=-0.85, 
+        distance=0.12
+    )
+    print(f"Quantum Interaction: Confidence = {quant_confidence:.1%}")
+    
+    # Anomaly detection
+    anomalies = analyzer.check_anomalies(
+        delta_temp=0.3, 
+        trajectory_shift=12, 
+        delta_pulsation=0.25
+    )
+    print("\nAnomalies Detected:")
+    for a in anomalies:
+        print(f" - {a}")
+    
+    # Validation recommendations
+    conf_scores = (vis_confidence, move_confidence, quant_confidence)
+    protocols = analyzer.suggest_validation(conf_scores)
+    print("\nRecommended Validation:")
+    for p in protocols:
+        print(f" - {p}")
+    
+    # Framework evolution
+    print(analyzer.log_evolution("1.1", "Adjusted mass range", "Large displacement observed"))
+    
+    print("\nEvolution Log:")
+    for version, change, trigger in analyzer.evolution_log:
+        print(f"v{version}: {change} ({trigger})")
